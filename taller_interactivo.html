@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taller Interactivo — Parcial Corte 1</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg:#080B10;
+  --panel:#0F151D;
+  --panel-2:#131B25;
+  --line:#223040;
+  --line-bright:#2E4258;
+  --amber:#FFD23F;
+  --amber-dim:#8a7228;
+  --cyan:#2FE0C6;
+  --cyan-dim:#1a6e62;
+  --good:#4ADE80;
+  --bad:#FF6161;
+  --text:#EAF2F5;
+  --muted:#7C8FA0;
+  --mono:'Space Mono', monospace;
+  --sans:'Inter', system-ui, sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+body{
+  background-image:
+    radial-gradient(circle at 15% 8%, rgba(47,224,198,0.06), transparent 40%),
+    radial-gradient(circle at 85% 92%, rgba(255,210,63,0.05), transparent 40%);
+  min-height:100vh;
+  padding-bottom:80px;
+}
+
+/* ---------- header ---------- */
+header{
+  padding:28px 20px 18px;
+  border-bottom:1px solid var(--line);
+  position:relative;
+  overflow:hidden;
+}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.18em;
+  color:var(--cyan);
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.eyebrow .dot{
+  width:7px;height:7px;border-radius:50%;background:var(--amber);
+  box-shadow:0 0 8px var(--amber);
+  animation:blink 1.6s infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+h1{
+  font-family:var(--mono);
+  font-size:clamp(22px,4.5vw,34px);
+  margin:8px 0 4px;
+  font-weight:700;
+  letter-spacing:-0.01em;
+}
+h1 span{color:var(--amber);}
+header p.sub{color:var(--muted);margin:0;font-size:14px;max-width:640px;line-height:1.5;}
+
+/* energy meter */
+.meter-wrap{
+  margin-top:18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  max-width:640px;
+}
+.meter-label{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;}
+.meter{
+  flex:1;
+  height:10px;
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:6px;
+  overflow:hidden;
+  position:relative;
+}
+.meter-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg, var(--cyan-dim), var(--cyan), var(--amber));
+  transition:width .5s ease;
+  box-shadow:0 0 12px rgba(47,224,198,.5);
+}
+.meter-pct{font-family:var(--mono);font-size:12px;color:var(--amber);min-width:38px;text-align:right;}
+
+/* ---------- nav ---------- */
+nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:16px 20px;
+  position:sticky;
+  top:0;
+  background:rgba(8,11,16,0.92);
+  backdrop-filter:blur(6px);
+  z-index:50;
+  border-bottom:1px solid var(--line);
+}
+.navbtn{
+  font-family:var(--mono);
+  font-size:12px;
+  padding:8px 12px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:20px;
+  color:var(--muted);
+  cursor:pointer;
+  transition:.2s;
+  white-space:nowrap;
+}
+.navbtn:hover{border-color:var(--line-bright);color:var(--text);}
+.navbtn.active{
+  background:rgba(255,210,63,0.12);
+  border-color:var(--amber);
+  color:var(--amber);
+}
+.navbtn .n{opacity:.6;margin-right:5px;}
+
+/* ---------- main layout ---------- */
+main{max-width:820px;margin:0 auto;padding:24px 20px 0;}
+.panel{display:none;animation:fadeIn .35s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:20px 22px;
+  margin-bottom:18px;
+}
+.card h2{
+  font-family:var(--mono);
+  font-size:17px;
+  margin:0 0 4px;
+  color:var(--text);
+  display:flex;align-items:center;gap:8px;
+}
+.card h2 .tag{
+  font-size:10px;
+  padding:2px 8px;
+  border-radius:10px;
+  background:var(--panel-2);
+  color:var(--cyan);
+  border:1px solid var(--cyan-dim);
+  font-family:var(--mono);
+}
+.card p{color:var(--muted);font-size:14.5px;line-height:1.65;margin:8px 0;}
+.card p strong{color:var(--text);}
+.formula{
+  font-family:var(--mono);
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--amber);
+  padding:10px 14px;
+  border-radius:6px;
+  font-size:15px;
+  margin:10px 0;
+  color:var(--amber);
+}
+
+/* circuit trace divider */
+.trace{
+  height:22px;
+  margin:4px 0 18px;
+  display:flex;
+  align-items:center;
+}
+.trace svg{width:100%;height:100%;}
+.trace path{
+  fill:none;
+  stroke:var(--line-bright);
+  stroke-width:1.5;
+  stroke-dasharray:6 6;
+  animation:flow 3s linear infinite;
+}
+@keyframes flow{to{stroke-dashoffset:-24;}}
+
+/* flashcards */
+.flash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:10px;}
+.flash{
+  perspective:800px;
+  height:100px;
+  cursor:pointer;
+}
+.flash-inner{
+  position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;
+  transition:transform .5s;
+}
+.flash.flipped .flash-inner{transform:rotateY(180deg);}
+.flash-face{
+  position:absolute;inset:0;
+  backface-visibility:hidden;
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;
+  padding:10px;
+  font-size:13px;
+  border:1px solid var(--line);
+}
+.flash-front{background:var(--panel-2);color:var(--cyan);font-family:var(--mono);font-weight:700;font-size:14px;}
+.flash-back{background:rgba(47,224,198,0.08);color:var(--text);transform:rotateY(180deg);font-size:12px;line-height:1.4;border-color:var(--cyan-dim);}
+
+/* quiz */
+.quiz-q{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);}
+.quiz-q:first-child{border-top:none;margin-top:6px;padding-top:0;}
+.quiz-q p.question{color:var(--text);font-weight:600;font-size:14.5px;margin-bottom:10px;}
+.opt{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  color:var(--text);
+  padding:9px 12px;
+  border-radius:8px;
+  margin-bottom:7px;
+  cursor:pointer;
+  font-size:13.5px;
+  font-family:var(--sans);
+  transition:.15s;
+}
+.opt:hover{border-color:var(--line-bright);}
+.opt.correct{border-color:var(--good);background:rgba(74,222,128,0.1);color:var(--good);}
+.opt.wrong{border-color:var(--bad);background:rgba(255,97,97,0.1);color:var(--bad);}
+.opt:disabled{cursor:default;}
+.feedback{font-size:12.5px;font-family:var(--mono);margin-top:4px;min-height:16px;}
+.feedback.good{color:var(--good);}
+.feedback.bad{color:var(--bad);}
+
+/* accordion */
+.acc-item{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden;background:var(--panel-2);}
+.acc-head{
+  padding:10px 14px;
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--text);
+}
+.acc-head .num{color:var(--amber);font-family:var(--mono);margin-right:8px;}
+.acc-head .arrow{color:var(--muted);transition:.25s;}
+.acc-item.open .arrow{transform:rotate(90deg);color:var(--cyan);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.acc-item.open .acc-body{max-height:200px;}
+.acc-body-inner{padding:0 14px 12px;color:var(--muted);font-size:13.5px;line-height:1.6;}
+
+/* calculators */
+.calc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px;}
+.calc label{font-family:var(--mono);font-size:11px;color:var(--muted);display:block;margin-bottom:4px;}
+.calc input{
+  width:100%;background:var(--panel-2);border:1px solid var(--line);
+  color:var(--text);padding:8px 10px;border-radius:6px;font-family:var(--mono);font-size:14px;
+}
+.calc input:focus{outline:none;border-color:var(--cyan);}
+.btn{
+  font-family:var(--mono);
+  background:var(--amber);
+  color:#1a1400;
+  border:none;
+  padding:9px 16px;
+  border-radius:8px;
+  font-weight:700;
+  font-size:12.5px;
+  cursor:pointer;
+  margin-top:12px;
+  transition:.15s;
+}
+.btn:hover{filter:brightness(1.1);}
+.btn.secondary{background:var(--panel-2);color:var(--cyan);border:1px solid var(--cyan-dim);}
+.result-line{
+  font-family:var(--mono);
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:6px;
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  font-size:13.5px;
+  min-height:18px;
+}
+.result-line.good{border-color:var(--good);color:var(--good);}
+.result-line.bad{border-color:var(--bad);color:var(--bad);}
+
+/* practice problem with answer check */
+.practice{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:14px;margin-top:12px;}
+.practice p{margin:0 0 10px;color:var(--text);font-size:14px;line-height:1.6;}
+.practice .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.practice input[type=text]{
+  background:var(--bg);border:1px solid var(--line);color:var(--text);
+  padding:8px 10px;border-radius:6px;font-family:var(--mono);width:130px;
+}
+.hint-box{
+  margin-top:10px;display:none;
+  border-left:3px solid var(--cyan);
+  padding:8px 12px;
+  background:rgba(47,224,198,0.06);
+  font-size:13px;color:var(--muted);border-radius:0 6px 6px 0;
+}
+.hint-box.show{display:block;}
+
+/* checklist */
+.check-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--line);
+  cursor:pointer;
+}
+.check-item:last-child{border-bottom:none;}
+.check-box{
+  width:20px;height:20px;border:2px solid var(--line-bright);border-radius:5px;
+  flex-shrink:0;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;
+  transition:.15s;
+}
+.check-item.done .check-box{background:var(--good);border-color:var(--good);}
+.check-box svg{opacity:0;width:12px;height:12px;}
+.check-item.done .check-box svg{opacity:1;}
+.check-item span{font-size:14px;color:var(--text);}
+.check-item.done span{color:var(--muted);text-decoration:line-through;}
+
+/* video links */
+.vid-card{
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+  padding:12px 14px;margin-bottom:8px;text-decoration:none;color:var(--text);
+  transition:.15s;
+}
+.vid-card:hover{border-color:var(--amber);}
+.vid-card .vt{font-size:13.5px;font-weight:600;}
+.vid-card .vs{font-size:11px;color:var(--muted);font-family:var(--mono);}
+.vid-card .go{color:var(--amber);font-family:var(--mono);font-size:16px;}
+
+/* coffee button */
+#coffee-btn{
+  position:fixed;bottom:18px;right:18px;
+  background:var(--panel);
+  border:1px solid var(--amber);
+  color:var(--amber);
+  font-family:var(--mono);
+  padding:10px 16px;
+  border-radius:24px;
+  cursor:pointer;
+  font-size:13px;
+  box-shadow:0 4px 20px rgba(255,210,63,0.15);
+  z-index:100;
+  display:flex;align-items:center;gap:8px;
+}
+#coffee-btn:hover{background:rgba(255,210,63,0.1);}
+#coffee-msg{
+  position:fixed;bottom:64px;right:18px;
+  font-family:var(--mono);font-size:11.5px;color:var(--cyan);
+  max-width:220px;text-align:right;opacity:0;transition:.3s;
+  z-index:100;
+}
+#coffee-msg.show{opacity:1;}
+
+.notice{
+  border:1px solid var(--amber-dim);
+  background:rgba(255,210,63,0.06);
+  border-radius:10px;
+  padding:14px 16px;
+  font-size:13.5px;
+  color:var(--muted);
+  margin-bottom:18px;
+}
+.notice strong{color:var(--amber);}
+
+footer{max-width:820px;margin:30px auto 0;padding:0 20px;color:var(--muted);font-size:12px;font-family:var(--mono);text-align:center;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow"><span class="dot"></span> TALLER DE ROBÓTICA · MÓDULO 1 · MODO REPASO NOCTURNO</div>
+  <h1>Panel de <span>práctica</span> — Parcial Corte 1</h1>
+  <p class="sub">Toca, resuelve, revisa. Cada card es interactiva — nada de scroll pasivo. Tu "carga" sube cada vez que resuelves algo.</p>
+  <div class="meter-wrap">
+    <span class="meter-label">CARGA:</span>
+    <div class="meter"><div class="meter-fill" id="meterFill"></div></div>
+    <span class="meter-pct" id="meterPct">0%</span>
+  </div>
+</header>
+
+<nav id="nav"></nav>
+
+<main id="main"></main>
+
+<footer>hecho a partir de Robotica_1a · Robotica_2a · Robotica_2b · Syllabus_taller_robotica_26</footer>
+
+<button id="coffee-btn" onclick="drinkCoffee()">☕ café virtual <span id="coffeeCount">(0)</span></button>
+<div id="coffee-msg"></div>
+
+<script>
+/* ---------------- progress engine ---------------- */
+let totalInteractions = 0;
+let doneInteractions = 0;
+function registerInteractive(count){ totalInteractions += count; updateMeter(); }
+function markDone(){ doneInteractions++; updateMeter(); }
+function updateMeter(){
+  const pct = totalInteractions ? Math.min(100, Math.round((doneInteractions/totalInteractions)*100)) : 0;
+  document.getElementById('meterFill').style.width = pct+'%';
+  document.getElementById('meterPct').textContent = pct+'%';
+}
+
+/* ---------------- coffee button ---------------- */
+let coffees = 0;
+const coffeeLines = [
+  "listo, un poco más de foco.",
+  "el examen no se estudia solo, pero ayuda.",
+  "recuerda: café no reemplaza Ley de Ohm.",
+  "tu corazón: +5 BPM. tu enfoque: +10%.",
+  "ojo con el quinto café, ya sabes lo que pasa.",
+  "hidrátate con agua también, ingeniero/a."
+];
+function drinkCoffee(){
+  coffees++;
+  document.getElementById('coffeeCount').textContent = '('+coffees+')';
+  const msg = document.getElementById('coffee-msg');
+  msg.textContent = coffeeLines[Math.min(coffees-1, coffeeLines.length-1)];
+  msg.classList.add('show');
+  setTimeout(()=>msg.classList.remove('show'), 2600);
+}
+
+/* ---------------- trace divider svg ---------------- */
+function traceSvg(){
+  return `<div class="trace"><svg viewBox="0 0 400 20" preserveAspectRatio="none"><path d="M0 10 H400"/></svg></div>`;
+}
+
+/* ---------------- reusable: quiz builder ---------------- */
+function buildQuiz(containerId, questions){
+  const el = document.getElementById(containerId);
+  registerInteractive(questions.length);
+  questions.forEach((q, qi)=>{
+    const qDiv = document.createElement('div');
+    qDiv.className = 'quiz-q';
+    const p = document.createElement('p');
+    p.className = 'question';
+    p.textContent = (qi+1)+'. '+q.q;
+    qDiv.appendChild(p);
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    q.opts.forEach((opt, oi)=>{
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.textContent = opt;
+      b.onclick = ()=>{
+        const buttons = qDiv.querySelectorAll('.opt');
+        buttons.forEach(btn=>btn.disabled=true);
+        if(oi === q.correct){
+          b.classList.add('correct');
+          fb.textContent = '✓ '+ q.why;
+          fb.className = 'feedback good';
+        } else {
+          b.classList.add('wrong');
+          buttons[q.correct].classList.add('correct');
+          fb.textContent = '✗ '+ q.why;
+          fb.className = 'feedback bad';
+        }
+        markDone();
+      };
+      qDiv.appendChild(b);
+    });
+    qDiv.appendChild(fb);
+    el.appendChild(qDiv);
+  });
+}
+
+/* ---------------- reusable: flashcards ---------------- */
+function buildFlash(containerId, cards){
+  const el = document.getElementById(containerId);
+  registerInteractive(cards.length);
+  const clicked = new Set();
+  cards.forEach((c, i)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'flash';
+    wrap.innerHTML = `<div class="flash-inner">
+      <div class="flash-face flash-front">${c.front}</div>
+      <div class="flash-face flash-back">${c.back}</div>
+    </div>`;
+    wrap.onclick = ()=>{
+      wrap.classList.toggle('flipped');
+      if(!clicked.has(i)){ clicked.add(i); markDone(); }
+    };
+    el.appendChild(wrap);
+  });
+}
+
+/* ---------------- reusable: accordion ---------------- */
+function buildAccordion(containerId, steps){
+  const el = document.getElementById(containerId);
+  registerInteractive(steps.length);
+  const opened = new Set();
+  steps.forEach((s, i)=>{
+    const item = document.createElement('div');
+    item.className = 'acc-item';
+    item.innerHTML = `<div class="acc-head"><span><span class="num">${String(i+1).padStart(2,'0')}</span>${s.title}</span><span class="arrow">▸</span></div>
+      <div class="acc-body"><div class="acc-body-inner">${s.body}</div></div>`;
+    item.querySelector('.acc-head').onclick = ()=>{
+      item.classList.toggle('open');
+      if(!opened.has(i)){ opened.add(i); markDone(); }
+    };
+    el.appendChild(item);
+  });
+}
+
+/* ---------------- practice problem with answer checking ---------------- */
+function buildPractice(containerId, id, statement, unit, correctVal, tolerance, hint){
+  const el = document.getElementById(containerId);
+  registerInteractive(1);
+  const div = document.createElement('div');
+  div.className = 'practice';
+  div.innerHTML = `
+    <p>${statement}</p>
+    <div class="row">
+      <input type="text" id="${id}_input" placeholder="tu respuesta">
+      <span style="font-family:var(--mono);color:var(--muted);font-size:13px;">${unit}</span>
+      <button class="btn" id="${id}_check">Verificar</button>
+      <button class="btn secondary" id="${id}_hint">Pista</button>
+    </div>
+    <div class="result-line" id="${id}_result"></div>
+    <div class="hint-box" id="${id}_hintbox">${hint}</div>
+  `;
+  el.appendChild(div);
+  let checked = false;
+  document.getElementById(id+'_check').onclick = ()=>{
+    const val = parseFloat(document.getElementById(id+'_input').value.replace(',','.'));
+    const result = document.getElementById(id+'_result');
+    if(isNaN(val)){
+      result.textContent = 'Escribe un número.';
+      result.className = 'result-line';
+      return;
+    }
+    if(Math.abs(val-correctVal) <= tolerance){
+      result.textContent = '✓ Correcto — tu planteamiento y cálculo están bien.';
+      result.className = 'result-line good';
+    } else {
+      result.textContent = '✗ Todavía no. Revisa unidades y el método (pista disponible) e inténtalo de nuevo.';
+      result.className = 'result-line bad';
+    }
+    if(!checked){ checked = true; markDone(); }
+  };
+  document.getElementById(id+'_hint').onclick = ()=>{
+    document.getElementById(id+'_hintbox').classList.toggle('show');
+  };
+}
+
+/* ---------------- checklist ---------------- */
+function buildChecklist(containerId, items){
+  const el = document.getElementById(containerId);
+  registerInteractive(items.length);
+  items.forEach((txt, i)=>{
+    const row = document.createElement('div');
+    row.className = 'check-item';
+    row.innerHTML = `<div class="check-box"><svg viewBox="0 0 24 24" fill="none" stroke="#08120a" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>${txt}</span>`;
+    let done = false;
+    row.onclick = ()=>{
+      row.classList.toggle('done');
+      const nowDone = row.classList.contains('done');
+      if(nowDone && !done){ done = true; markDone(); }
+      if(!nowDone && done){ done = false; doneInteractions--; updateMeter(); }
+    };
+    el.appendChild(row);
+  });
+}
+
+/* ================= PANEL DEFINITIONS ================= */
+const panels = [
+  {id:'magnitudes', label:'Magnitudes'},
+  {id:'ohm', label:'Ley de Ohm'},
+  {id:'potencia', label:'Potencia y Energía'},
+  {id:'topologia', label:'Nodos/Ramas/Mallas'},
+  {id:'kirchhoff', label:'Kirchhoff'},
+  {id:'hibridos', label:'Circuitos Híbridos'},
+  {id:'avanzado', label:'Nodos y Mallas (matrices)'},
+  {id:'checklist', label:'Checklist'},
+  {id:'videos', label:'Videos'}
+];
+
+const nav = document.getElementById('nav');
+panels.forEach((p, i)=>{
+  const b = document.createElement('button');
+  b.className = 'navbtn' + (i===0?' active':'');
+  b.innerHTML = `<span class="n">${String(i+1).padStart(2,'0')}</span>${p.label}`;
+  b.onclick = ()=>{
+    document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    document.getElementById('panel-'+p.id).classList.add('active');
+    window.scrollTo({top: main.offsetTop-10, behavior:'smooth'});
+  };
+  nav.appendChild(b);
+});
+
+const main = document.getElementById('main');
+panels.forEach((p,i)=>{
+  const d = document.createElement('div');
+  d.className = 'panel'+(i===0?' active':'');
+  d.id = 'panel-'+p.id;
+  main.appendChild(d);
+});
+
+/* ---------- 1. MAGNITUDES ---------- */
+(function(){
+  const el = document.getElementById('panel-magnitudes');
+  el.innerHTML = `
+  <div class="card">
+    <h2>Magnitudes físicas <span class="tag">flashcards</span></h2>
+    <p>Toca cada tarjeta para voltearla. Ciérrala mentalmente antes de mirar la respuesta.</p>
+    <div class="flash-grid" id="flash-mag"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Autoevaluación rápida <span class="tag">quiz</span></h2>
+    <div id="quiz-mag"></div>
+  </div>`;
+  buildFlash('flash-mag', [
+    {front:'Corriente (I)', back:'Flujo de electrones. Se mide en Amperios (A). Analogía: el agua que fluye por una tubería.'},
+    {front:'Voltaje (V)', back:'Diferencia de energía potencial entre dos puntos. Se mide en Voltios (V). Analogía: la presión del agua.'},
+    {front:'Resistencia (R)', back:'Oposición al flujo de cargas. Se mide en Ohmios (Ω). Analogía: una tubería angosta.'},
+    {front:'Potencia (P)', back:'Trabajo realizado por unidad de tiempo. Se mide en Watts (W). P = V·I.'},
+    {front:'Energía (W)', back:'Potencia usada durante un intervalo de tiempo. Se mide en kWh. W = P·t.'},
+    {front:'Señal análoga', back:'Toma cualquier valor en el tiempo (continua). Ej: voltaje de una onda senoidal.'},
+    {front:'Señal digital', back:'Toma valores puntuales/discretos. Es la que usan los computadores.'},
+    {front:'DC vs AC', back:'DC: corriente directa, fluye en un solo sentido. AC: corriente alterna, cambia de sentido periódicamente.'}
+  ]);
+  buildQuiz('quiz-mag', [
+    {q:'¿Qué magnitud se mide en Amperios?', opts:['Voltaje','Corriente','Resistencia','Potencia'], correct:1, why:'La corriente (A) es el flujo de electrones.'},
+    {q:'En la analogía del agua, la resistencia equivale a...', opts:['La cantidad de agua','La presión','Una tubería angosta','El color del agua'], correct:2, why:'Una tubería angosta se opone al flujo, igual que una resistencia se opone a la corriente.'},
+    {q:'¿Cuál de estas es una señal digital?', opts:['Voltaje de una onda senoidal continua','Una secuencia de 0s y 1s','La temperatura ambiente medida en el tiempo','La presión de una tubería'], correct:1, why:'Las señales digitales toman valores discretos y puntuales, como 0/1.'}
+  ]);
+})();
+
+/* ---------- 2. LEY DE OHM ---------- */
+(function(){
+  const el = document.getElementById('panel-ohm');
+  el.innerHTML = `
+  <div class="card">
+    <h2>La ley <span class="tag">V = I·R</span></h2>
+    <div class="formula">V = I · R &nbsp;&nbsp;|&nbsp;&nbsp; I = V / R &nbsp;&nbsp;|&nbsp;&nbsp; R = V / I</div>
+    <p>Truco: en el "triángulo mágico" tapas la variable que buscas y lo que queda es la operación entre las otras dos.</p>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Calculadora del triángulo <span class="tag">herramienta</span></h2>
+    <p>Llena <strong>dos</strong> de los tres campos y calcula el tercero — úsalo para comprobar tus propios ejercicios, no para hacer la tarea por ti.</p>
+    <div class="calc">
+      <div><label>V (voltios)</label><input type="text" id="ohmV" placeholder="—"></div>
+      <div><label>I (amperios)</label><input type="text" id="ohmI" placeholder="—"></div>
+      <div><label>R (ohmios)</label><input type="text" id="ohmR" placeholder="—"></div>
+    </div>
+    <button class="btn" id="ohmCalc">Calcular variable faltante</button>
+    <div class="result-line" id="ohmResult"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Ejercicios para practicar <span class="tag">con verificación</span></h2>
+    <div id="ohm-practice"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Autoevaluación <span class="tag">quiz</span></h2>
+    <div id="quiz-ohm"></div>
+  </div>`;
+
+  registerInteractive(1);
+  let ohmCalcUsed = false;
+  document.getElementById('ohmCalc').onclick = ()=>{
+    const V = parseFloat(document.getElementById('ohmV').value);
+    const I = parseFloat(document.getElementById('ohmI').value);
+    const R = parseFloat(document.getElementById('ohmR').value);
+    const result = document.getElementById('ohmResult');
+    const known = [!isNaN(V), !isNaN(I), !isNaN(R)].filter(Boolean).length;
+    if(known < 2){
+      result.textContent = 'Ingresa al menos dos valores.';
+      result.className = 'result-line';
+    } else if(isNaN(V)){
+      const v = I*R;
+      result.textContent = `V = I·R = ${I} × ${R} = ${v.toFixed(4)} V`;
+      result.className = 'result-line good';
+    } else if(isNaN(I)){
+      const i = V/R;
+      result.textContent = `I = V/R = ${V} / ${R} = ${i.toFixed(6)} A`;
+      result.className = 'result-line good';
+    } else {
+      const r = V/I;
+      result.textContent = `R = V/I = ${V} / ${I} = ${r.toFixed(4)} Ω`;
+      result.className = 'result-line good';
+    }
+    if(!ohmCalcUsed){ ohmCalcUsed = true; markDone(); }
+  };
+
+  buildPractice('ohm-practice', 'ohmP1',
+    'Un circuito tiene una fuente de <strong>12 V</strong> y una resistencia R en serie. El amperímetro mide <strong>3 mA</strong>. ¿Cuál es el valor de R?',
+    'Ω', 4000, 20,
+    'Pasa 3 mA a amperios (0.003 A) antes de dividir. R = V / I.');
+
+  buildPractice('ohm-practice', 'ohmP2',
+    'Un circuito tiene <strong>R = 470 Ω</strong>. ¿Qué voltaje de fuente necesitas para que circulen exactamente <strong>15 mA</strong>?',
+    'V', 7.05, 0.1,
+    'Pasa 15 mA a amperios (0.015 A). V = I·R.');
+
+  buildQuiz('quiz-ohm', [
+    {q:'Si en una gráfica I vs. V la pendiente de la recta es 0.2, ¿cuánto vale R?', opts:['0.2 Ω','5 Ω','2 Ω','0.5 Ω'], correct:1, why:'La pendiente de I vs V es 1/R, entonces R = 1/0.2 = 5 Ω.'},
+    {q:'Si dividieras un solo par (V,I) de una tabla experimental para hallar R, ¿qué riesgo corres?', opts:['Ninguno, siempre es exacto','Que ese punto tenga error de medición y no represente bien la recta','Que las unidades cambien solas','Que la resistencia se caliente'], correct:1, why:'Es mejor usar la pendiente con varios puntos (o promediar) que un solo par de datos, que puede tener ruido experimental.'}
+  ]);
+})();
+
+/* ---------- 3. POTENCIA Y ENERGÍA ---------- */
+(function(){
+  const el = document.getElementById('panel-potencia');
+  el.innerHTML = `
+  <div class="card">
+    <h2>Fórmulas <span class="tag">P y W</span></h2>
+    <div class="formula">P = V · I &nbsp;&nbsp;(también P = I²R = V²/R)</div>
+    <div class="formula">W = P · t &nbsp;&nbsp;(usualmente en kWh si t está en horas)</div>
+    <p>Cuidado con las unidades: si tienes W y minutos, conviértelos a kW y horas <strong>antes</strong> de multiplicar por la tarifa.</p>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Calculadora de costo de energía <span class="tag">herramienta</span></h2>
+    <div class="calc">
+      <div><label>Potencia (W)</label><input type="text" id="pW"></div>
+      <div><label>Horas de uso/día</label><input type="text" id="pH"></div>
+      <div><label>Días</label><input type="text" id="pD"></div>
+    </div>
+    <div class="calc" style="grid-template-columns:1fr;">
+      <div><label>Costo del kWh ($)</label><input type="text" id="pC"></div>
+    </div>
+    <button class="btn" id="pCalc">Calcular costo</button>
+    <div class="result-line" id="pResult"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Ejercicio para practicar <span class="tag">con verificación</span></h2>
+    <div id="pot-practice"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Autoevaluación <span class="tag">quiz</span></h2>
+    <div id="quiz-pot"></div>
+  </div>`;
+
+  registerInteractive(1);
+  let pCalcUsed = false;
+  document.getElementById('pCalc').onclick = ()=>{
+    const W = parseFloat(document.getElementById('pW').value);
+    const H = parseFloat(document.getElementById('pH').value);
+    const D = parseFloat(document.getElementById('pD').value);
+    const C = parseFloat(document.getElementById('pC').value);
+    const result = document.getElementById('pResult');
+    if([W,H,D,C].some(isNaN)){
+      result.textContent = 'Llena los cuatro campos.';
+      result.className = 'result-line';
+    } else {
+      const kwh = (W/1000)*H*D;
+      const cost = kwh*C;
+      result.textContent = `Energía = ${kwh.toFixed(3)} kWh → Costo = $${cost.toFixed(0)}`;
+      result.className = 'result-line good';
+    }
+    if(!pCalcUsed){ pCalcUsed = true; markDone(); }
+  };
+
+  buildPractice('pot-practice', 'potP1',
+    'Una plancha de <strong>1000 W</strong> se usa <strong>20 minutos</strong> diarios durante <strong>30 días</strong>. Si el kWh cuesta <strong>$600</strong>, ¿cuánto cuesta usarla ese mes?',
+    '$', 6000, 50,
+    '20 min = 1/3 h. Energía diaria = 1 kW × (1/3) h = 0.333 kWh. Multiplica por 30 días y luego por $600.');
+
+  buildQuiz('quiz-pot', [
+    {q:'Si P = 2000 W y t = 3 h, ¿cuántos kWh se consumieron?', opts:['6 kWh','600 kWh','0.6 kWh','60 kWh'], correct:0, why:'2000 W = 2 kW. 2 kW × 3 h = 6 kWh.'},
+    {q:'¿Cuál fórmula de potencia NO necesita conocer el voltaje directamente?', opts:['P = V·I','P = I²R','P = V²/R','Todas necesitan V'], correct:1, why:'P = I²R solo usa corriente y resistencia, sin necesidad del voltaje.'}
+  ]);
+})();
+
+/* ---------- 4. TOPOLOGÍA (nodos, ramas, mallas) ---------- */
+(function(){
+  const el = document.getElementById('panel-topologia');
+  el.innerHTML = `
+  <div class="card">
+    <h2>Definiciones clave <span class="tag">flashcards</span></h2>
+    <div class="flash-grid" id="flash-topo"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Identifica la conexión <span class="tag">quiz</span></h2>
+    <div id="quiz-topo"></div>
+  </div>`;
+  buildFlash('flash-topo', [
+    {front:'Nodo', back:'Punto de conexión de dos o más elementos de un circuito.'},
+    {front:'Rama', back:'Porción del circuito entre dos nodos consecutivos.'},
+    {front:'Malla', back:'Circuito cerrado dentro de la red.'},
+    {front:'Serie', back:'Comparten UNA terminal, no conectada a nada más. La corriente es igual en ambos elementos.'},
+    {front:'Paralelo', back:'Comparten SUS DOS puntos de conexión. El voltaje es igual en ambos elementos.'}
+  ]);
+  buildQuiz('quiz-topo', [
+    {q:'Dos resistencias comparten sus dos terminales entre sí. ¿Qué es igual en ambas?', opts:['La corriente','El voltaje','La potencia','Nada, dependen del valor'], correct:1, why:'Es una conexión en paralelo: comparten los dos nodos, por lo tanto el voltaje es el mismo en ambas.'},
+    {q:'Dos resistencias comparten solo una terminal, y esa terminal no se conecta a nada más. ¿Cómo están conectadas?', opts:['En paralelo','En serie','En malla abierta','No se puede saber'], correct:1, why:'Esa es justamente la definición de conexión en serie: una terminal común, sin ramificarse.'},
+    {q:'¿Qué es una malla?', opts:['Un punto de conexión de 2+ elementos','La porción de circuito entre dos nodos','Un circuito cerrado','La resistencia total del circuito'], correct:2, why:'Malla = camino cerrado dentro del circuito.'}
+  ]);
+})();
+
+/* ---------- 5. KIRCHHOFF ---------- */
+(function(){
+  const el = document.getElementById('panel-kirchhoff');
+  el.innerHTML = `
+  <div class="card">
+    <h2>Ley de Voltajes de Kirchhoff (LVK) <span class="tag">∑V = 0</span></h2>
+    <div class="formula">∑V (malla cerrada) = 0</div>
+    <p>Método paso a paso — toca cada paso:</p>
+    <div id="acc-lvk"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Ley de Corrientes de Kirchhoff (LCK) <span class="tag">∑I_entra = ∑I_sale</span></h2>
+    <p>Método paso a paso:</p>
+    <div id="acc-lck"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Auto-chequeo de nodo <span class="tag">herramienta</span></h2>
+    <p>Escribe las corrientes que entran y salen de un nodo (separadas por coma) y verifica si está balanceado — así detectas errores de signo antes de entregar.</p>
+    <div class="calc" style="grid-template-columns:1fr 1fr;">
+      <div><label>Corrientes que ENTRAN (A) — ej: 3,2</label><input type="text" id="inCur"></div>
+      <div><label>Corrientes que SALEN (A) — ej: 1,4</label><input type="text" id="outCur"></div>
+    </div>
+    <button class="btn" id="nodeCheck">Verificar nodo</button>
+    <div class="result-line" id="nodeResult"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Practica con tus propias diapositivas</h2>
+    <p><strong>Robotica_2a</strong>, diapositivas 13 a 15: 8 circuitos de práctica hechos por tu profesor — resuélvelos todos a mano antes de seguir. Son tu mejor simulacro.</p>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Autoevaluación <span class="tag">quiz</span></h2>
+    <div id="quiz-kir"></div>
+  </div>`;
+
+  buildAccordion('acc-lvk', [
+    {title:'Define el sentido de la corriente', body:'Si no te lo dan, asume un sentido. Si al resolver da negativo, la corriente real va al contrario — no es un error tuyo.'},
+    {title:'Recorre la malla en un solo sentido', body:'Elige un punto de partida y recorre toda la malla sin cambiar de dirección a mitad de camino.'},
+    {title:'Aplica la regla de signos', body:'Si entras a un elemento por "–" y sales por "+", SUMAS ese voltaje. Si entras por "+" y sales por "–", lo RESTAS.'},
+    {title:'Iguala a cero y despeja', body:'Con la ecuación ∑V=0 despejas la incógnita, normalmente la corriente. Luego usas Ley de Ohm para los voltajes individuales.'}
+  ]);
+  buildAccordion('acc-lck', [
+    {title:'Identifica el nodo', body:'Define claramente qué corrientes entran y cuáles salen, usando las flechas dadas o asumiendo un sentido.'},
+    {title:'Plantea la igualdad', body:'∑I que entran = ∑I que salen.'},
+    {title:'Si hay más de una incógnita', body:'Necesitas otra ecuación (LVK o Ley de Ohm) para resolver el sistema completo.'}
+  ]);
+
+  registerInteractive(1);
+  let nodeUsed = false;
+  document.getElementById('nodeCheck').onclick = ()=>{
+    const inArr = document.getElementById('inCur').value.split(',').map(x=>parseFloat(x)).filter(x=>!isNaN(x));
+    const outArr = document.getElementById('outCur').value.split(',').map(x=>parseFloat(x)).filter(x=>!isNaN(x));
+    const result = document.getElementById('nodeResult');
+    if(inArr.length===0 || outArr.length===0){
+      result.textContent = 'Ingresa al menos un valor en cada campo.';
+      result.className = 'result-line';
+    } else {
+      const sumIn = inArr.reduce((a,b)=>a+b,0);
+      const sumOut = outArr.reduce((a,b)=>a+b,0);
+      if(Math.abs(sumIn-sumOut) < 0.001){
+        result.textContent = `✓ Balanceado: entran ${sumIn} A = salen ${sumOut} A`;
+        result.className = 'result-line good';
+      } else {
+        result.textContent = `✗ No balanceado: entran ${sumIn} A ≠ salen ${sumOut} A (diferencia ${(sumIn-sumOut).toFixed(3)} A) — revisa signos o corrientes faltantes.`;
+        result.className = 'result-line bad';
+      }
+    }
+    if(!nodeUsed){ nodeUsed = true; markDone(); }
+  };
+
+  buildQuiz('quiz-kir', [
+    {q:'En una malla, si al despejar la corriente el resultado da negativo...', opts:['El ejercicio está mal planteado','La corriente real fluye en sentido contrario al que asumiste','Hay que repetir todo desde cero','Es imposible, revisa la fuente'], correct:1, why:'Un signo negativo solo indica que el sentido real es el opuesto al que asumiste — el valor absoluto sigue siendo válido.'},
+    {q:'¿Cuál es la mejor forma de auto-verificar un ejercicio de Kirchhoff ya resuelto?', opts:['Confiar en el primer resultado','Comprobar que ∑I=0 en cada nodo y ∑V=0 en cada malla','Repetir el ejercicio exactamente igual','No es posible verificar sin la respuesta del profesor'], correct:1, why:'Verificar que las sumas den cero en nodos y mallas es la forma más confiable de encontrar errores de signo.'}
+  ]);
+})();
+
+/* ---------- 6. CIRCUITOS HÍBRIDOS ---------- */
+(function(){
+  const el = document.getElementById('panel-hibridos');
+  el.innerHTML = `
+  <div class="card">
+    <h2>Cuando ya no es serie ni paralelo puro</h2>
+    <p>"En general los circuitos son de naturaleza híbrida. Las Leyes de Kirchhoff nos permiten resolver este tipo de circuitos" — tu profesor.</p>
+    <p>No hay atajo: si el circuito no se deja reducir con serie/paralelo simple, vuelves a Kirchhoff.</p>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Método general <span class="tag">pasos</span></h2>
+    <div id="acc-hib"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Autoevaluación <span class="tag">quiz</span></h2>
+    <div id="quiz-hib"></div>
+  </div>`;
+  buildAccordion('acc-hib', [
+    {title:'Cuenta nodos y mallas', body:'Antes de plantear nada, identifica cuántos nodos y cuántas mallas independientes tiene el circuito.'},
+    {title:'Asigna variables', body:'Corrientes de malla o voltajes de nodo, según el método que vayas a usar.'},
+    {title:'Plantea una ecuación por cada malla/nodo', body:'LVK para cada malla independiente, o LCK para cada nodo (menos uno, el de referencia).'},
+    {title:'Resuelve el sistema', body:'Con sustitución si es pequeño, o con matrices (ver siguiente sección) si el circuito es grande.'}
+  ]);
+  buildQuiz('quiz-hib', [
+    {q:'Si un circuito no es puramente serie ni puramente paralelo, ¿qué herramienta usas?', opts:['Solo Ley de Ohm','Leyes de Kirchhoff (LVK y/o LCK)','Ninguna, no se puede resolver','Cambiar el circuito'], correct:1, why:'Las Leyes de Kirchhoff son la herramienta general que funciona sin importar la topología del circuito.'}
+  ]);
+})();
+
+/* ---------- 7. AVANZADO (nodos y mallas con matrices) ---------- */
+(function(){
+  const el = document.getElementById('panel-avanzado');
+  el.innerHTML = `
+  <div class="card">
+    <h2>Algoritmo — método de mallas (LVK)</h2>
+    <div id="acc-mallas"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Algoritmo — método de nodos (LCK)</h2>
+    <div id="acc-nodos"></div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>El paso final: A·x = b <span class="tag">calculadora</span></h2>
+    <p>Una vez tienes tus ecuaciones, se arman como <strong>A·x = b</strong>, y la solución es <strong>x = A⁻¹·b</strong>. En el examen esto se resuelve con la calculadora en modo matricial — no inviertas matrices a mano.</p>
+    <div class="formula">1. Ordena las ecuaciones (mismo orden de incógnitas en cada fila)<br>2. Arma A (coeficientes) y b (términos independientes) en la calculadora<br>3. Pide A⁻¹·b, o usa la función de sistemas lineales</div>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>¿Mallas o nodos?</h2>
+    <p>Si el circuito tiene <strong>más fuentes de voltaje</strong>, mallas suele ser más directo. Si tiene <strong>más fuentes de corriente</strong>, nodos suele ser más directo. En caso de duda, compara: número de mallas vs. número de nodos−1, y usa el que te dé menos ecuaciones.</p>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Practica con tus propias diapositivas</h2>
+    <p><strong>Robotica_2b</strong>, diapositivas 11 a 14: 4 circuitos con varias mallas y nodos, listos para aplicar el algoritmo completo. Resuélvelos por ambos métodos si te alcanza el tiempo — si te da la misma respuesta por los dos caminos, vas bien.</p>
+  </div>
+  ${traceSvg()}
+  <div class="card">
+    <h2>Autoevaluación <span class="tag">quiz</span></h2>
+    <div id="quiz-avz"></div>
+  </div>`;
+
+  buildAccordion('acc-mallas', [
+    {title:'Escribe todas las corrientes de malla', body:'Escoge una dirección arbitraria para cada una (usualmente todas horario, por consistencia).'},
+    {title:'Fuentes de voltaje', body:'Sigue siempre la regla de sumar si vas de "–" a "+", restar si vas de "+" a "–".'},
+    {title:'Resistencias', body:'Asume que se tienen caídas de voltaje sobre ellas.'},
+    {title:'Resistencias compartidas entre mallas', body:'Escribe primero la corriente de la malla actual y resta la corriente de la malla vecina.'}
+  ]);
+  buildAccordion('acc-nodos', [
+    {title:'Nombra los nodos', body:'Escoge uno como referencia (tierra, 0 V).'},
+    {title:'Resistencias', body:'Se asume que la corriente sale del nodo en análisis.'},
+    {title:'Nodos con fuentes', body:'Se conoce directamente su diferencia de potencial, dada por la fuente.'},
+    {title:'Fuentes que necesitan su corriente', body:'Se plantean como un "supernodo" agrupando los dos nodos que conecta la fuente.'}
+  ]);
+  buildQuiz('quiz-avz', [
+    {q:'¿Qué representa la ecuación x = A⁻¹·b en este contexto?', opts:['El valor de una sola resistencia','El vector solución (corrientes o voltajes) del sistema','La potencia total del circuito','Un error de cálculo'], correct:1, why:'A·x=b es el sistema de ecuaciones del circuito; x=A⁻¹·b te da directamente el vector con las incógnitas (corrientes de malla o voltajes de nodo).'},
+    {q:'Un circuito tiene muchas fuentes de corriente y pocas de voltaje. ¿Qué método conviene más?', opts:['Método de mallas','Método de nodos','Ninguno funciona','Ley de Ohm únicamente'], correct:1, why:'Con fuentes de corriente predominantes, el análisis nodal suele requerir menos ecuaciones y es más directo.'}
+  ]);
+})();
+
+/* ---------- 8. CHECKLIST ---------- */
+(function(){
+  const el = document.getElementById('panel-checklist');
+  el.innerHTML = `
+  <div class="card">
+    <h2>Checklist final <span class="tag">antes de dormir</span></h2>
+    <p>Marca lo que ya dominas. Si algo queda sin marcar, vuelve a esa sección.</p>
+    <div id="check-list"></div>
+  </div>`;
+  buildChecklist('check-list', [
+    'Puedo explicar corriente, voltaje, resistencia, potencia y energía con mis palabras.',
+    'Puedo despejar cualquiera de las tres variables de la Ley de Ohm sin mirar el triángulo.',
+    'Puedo leer una gráfica I-V o una tabla de datos y sacar la resistencia por la pendiente.',
+    'Puedo calcular el costo en pesos de usar un electrodoméstico, convirtiendo bien unidades.',
+    'Puedo identificar nodos, ramas y mallas en un circuito dibujado a mano.',
+    'Resolví los 8 ejercicios de práctica de Robotica_2a (diapositivas 13-15).',
+    'Resolví los 4 ejercicios de práctica de Robotica_2b (diapositivas 11-14).',
+    'Sé armar la matriz A y el vector b en mi calculadora y resolver A⁻¹·b.',
+    'Verifiqué al menos un ejercicio comprobando que la suma de corrientes en un nodo dé cero.'
+  ]);
+})();
+
+/* ---------- 9. VIDEOS ---------- */
+(function(){
+  const el = document.getElementById('panel-videos');
+  el.innerHTML = `<div class="card"><h2>Videos de apoyo</h2><p>Ábrelos si algún tema no te quedó claro con la teoría.</p><div id="vid-list"></div></div>`;
+  const vids = [
+    {t:'Ley de Ohm — ejercicios paso a paso', s:'Math2Me', u:'https://www.youtube.com/watch?v=izDKIyCPRWE'},
+    {t:'Ley de Ohm explicación fácil (triángulo + ejercicios en serie)', s:'YouTube', u:'https://www.youtube.com/watch?v=wHQrMuJAjak'},
+    {t:'Ley de Ohm y Potencia Eléctrica', s:'1 Ohm Academy', u:'https://www.youtube.com/watch?v=lAik1r4jHyc'},
+    {t:'Leyes de Kirchhoff (mallas y nodos) — ejercicio + teoría', s:'YouTube', u:'https://www.youtube.com/watch?v=EwY13yT1tSo'},
+    {t:'Ley de Voltaje de Kirchhoff — paso a paso', s:'YouTube', u:'https://www.youtube.com/watch?v=6wjIKvDgoKY'},
+    {t:'Ley de Kirchhoff (mallas) — ejercicio 1', s:'YouTube', u:'https://www.youtube.com/watch?v=1NC9kGDn7Bg'},
+    {t:'Análisis de nodos — teoría y ejemplos', s:'YouTube', u:'https://www.youtube.com/watch?v=drOhxYItpaA'},
+    {t:'Análisis de circuitos, método de mallas — ejemplo 1', s:'YouTube', u:'https://www.youtube.com/watch?v=J9U7QPv-Qx4'},
+    {t:'Solución de circuitos por nodos y mallas con matrices', s:'Millermatematicas', u:'https://www.youtube.com/watch?v=LrVd6ehkpuk'},
+    {t:'Método de las matrices — circuito de corriente continua', s:'YouTube', u:'https://www.youtube.com/watch?v=OSWup8CXnv0'}
+  ];
+  const list = document.getElementById('vid-list');
+  vids.forEach(v=>{
+    const a = document.createElement('a');
+    a.href = v.u; a.target = '_blank'; a.className = 'vid-card';
+    a.innerHTML = `<div><div class="vt">${v.t}</div><div class="vs">${v.s}</div></div><div class="go">↗</div>`;
+    list.appendChild(a);
+  });
+})();
+
+</script>
+</body>
+</html>
